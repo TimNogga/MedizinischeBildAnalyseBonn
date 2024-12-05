@@ -284,7 +284,24 @@ def resample_polygon(yx, n_points):
     ### TODO
     # Hier könnte dein Code stehen b)
     ###
-    return None
+
+    n, _ = yx.shape
+
+    xp = yx[:, 1]
+    fp = yx[:, 0]
+
+    indices = np.arange(0, n_points, step=1) * n / n_points
+
+    
+
+    indices = np.zeros((n_points), dtype=int)
+
+    for i in range(n_points):
+        indices[i] = int(i * n / n_points)
+
+    result = yx[indices, :]
+    print(result.shape)
+    return result
 
 
 
