@@ -280,28 +280,52 @@ def upload(contents, fname, n):
     return img, upload_container(fname), {'width': '100%', 'opacity': '1'}
 
 
-def resample_polygon(yx, n_points):
+def resample_polygon(xy: np.ndarray, n_points: int = 100) -> np.ndarray:
     ### TODO
-    # Hier könnte dein Code stehen b)
+    # b) Hier könnte dein Code stehen, inklusive return statement
     ###
 
-    n, _ = yx.shape
+    n, _ = xy.shape
 
-    xp = yx[:, 1]
-    fp = yx[:, 0]
+    xp = xy[:, 0]
+    fp = xy[:, 1]
 
-    indices = np.arange(0, n_points, step=1) * n / n_points
+    indices = np.argsort(xp)
 
-    
+    xp = xp[indices]
+    fp = fp[indices]
 
-    indices = np.zeros((n_points), dtype=int)
+    interp_indices = np.linspace(xp[0], xp[-1], n_points)
 
-    for i in range(n_points):
-        indices[i] = int(i * n / n_points)
+    result = np.interp(interp_indices, xp, fp)
 
-    result = yx[indices, :]
-    print(result.shape)
-    return result
+    return np.column_stack((interp_indices, result))
+
+
+
+@app.callback(Output('init', 'data'),
+              Output('boundary_condition', 'data'),
+              Output('hidden-continue', 'style'),
+              Input('get-contures', 'n_clicks'),
+              State('picture', 'relayoutData'),
+              State('img-store', 'data'),
+              State('points', 'value'),
+              prevent_initial_call=True)
+def compute_snake(n, init, img, p):
+    if 'shapes' not in str(init):
+        return dash.no_update, dash.no_update, dash.no_update
+    if init['shapes'][-1]['type'] == 'path':
+        boundary_condition = 'fixed'
+        init = re.split('M|L', init['shapes'][-1]['path'])
+        init = np.array([list(map(float, x.split(',')))[::-1] for x in init[1:]])
+        poly = resample_polygon(np.array(init), int(p))
+
+        if poly is None:
+            return dash.no_update, dash.no_update, dash.no_update
+
+    else:
+        return dash.no_update, dash.no_update, dash.no_update
+    return poly, boundary_condition, {'display': 'flex', 'flexDirection': 'row', 'visibility': 'visible', 'justifyContent': 'space-between'}
 
 
 
