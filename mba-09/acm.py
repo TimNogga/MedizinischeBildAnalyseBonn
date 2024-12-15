@@ -323,8 +323,26 @@ def compute_snake(n, init, img, p):
         # Hier könnte Dein Code stehen: Teil a)
         ###
 
-        if not poly:
-            poly = np.loadtxt('sehnervenkopf.csv', delimiter=',')
+        x0 = init['shapes'][0]['x0']
+        y0 = init['shapes'][0]['y0']
+        x1 = init['shapes'][0]['x1']
+        y1 = init['shapes'][0]['y1']
+
+        cx = (x1 + x0) / 2
+        cy = (y1 + y0) / 2
+
+        hx = abs(cx - x0)
+        hy = abs(cy - y0)
+
+        theta = np.linspace(0, 2 * np.pi, int(p))
+
+        x = cx + hx * np.cos(theta)
+        y = cy + hy * np.sin(theta)
+
+        poly = np.column_stack((y, x))
+
+        #if not poly:
+        #    poly = np.loadtxt('sehnervenkopf.csv', delimiter=',')
 
  
     else:
